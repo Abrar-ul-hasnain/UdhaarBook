@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UdhaarBook</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+  <!-- Animate.css -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Day.js -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="app">
+
+    
+    <!-- Screen 1: Home -->
+<div id="screen-home" class="screen">
+
+  <!-- Header -->
+  <div class="home-header">
+    <div class="home-logo">
+      <i class="ri-hand-coin-fill"></i>
+    </div>
+    <div>
+      <h1>UdhaarBook</h1>
+      <p class="text-secondary">Track informal loans with trust.</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-label">Given</span>
+      <span class="stat-value" id="stat-given">PKR 0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Taken</span>
+      <span class="stat-value" id="stat-taken">PKR 0</span>
+    </div>
+    <div class="stat-card stat-card-danger">
+      <span class="stat-label">Overdue</span>
+      <span class="stat-value" id="stat-overdue">0</span>
+    </div>
+  </div>
+
+  <!-- CTA Cards -->
+  <div class="cta-row">
+    <div class="cta-card" onclick="showScreen('screen-create')">
+      <i class="ri-add-circle-line"></i>
+      <span>I gave udhaar</span>
+    </div>
+    <div class="cta-card cta-card-outline" onclick="showScreen('screen-dashboard')">
+      <i class="ri-layout-grid-line"></i>
+      <span>My dashboard</span>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="section-header">
+    <h3>Recent Activity</h3>
+  </div>
+
+  <div id="recent-activity-list">
+    <!-- Filled by JS -->
+  </div>
+
+</div>
+
+    <!-- Screen 2: Create Udhaar -->
+     <div id="screen-create" class="screen hidden">
+
+      <div class="screen-topbar">
+        <button class="back-btn" onclick="showScreen('screen-home')">
+          <i class="ri-arrow-left-line"></i>
+        </button>
+        <h2>New Udhaar</h2>
+        <div></div>
+      </div>
+
+      <div class="input-group">
+        <label>Borrower Name</label>
+        <input type="text" id="field-borrower" placeholder="e.g. Ahmed Raza" />
+      </div>
+
+      <div class="input-group">
+        <label>Borrower Phone</label>
+        <input type="tel" id="field-phone" placeholder="e.g. 03001234567" />
+      </div>
+
+      <div class="input-group">
+        <label>Amount (PKR)</label>
+        <input type="number" id="field-amount" placeholder="e.g. 5000" />
+      </div>
+
+      <div class="input-group">
+        <label>Due Date</label>
+        <input type="date" id="field-due" />
+      </div>
+
+      <div class="input-group">
+        <label>Note (optional)</label>
+        <textarea id="field-note" placeholder="e.g. For books, rent, etc."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="createUdhaar()">
+        <i class="ri-save-line"></i> Save & Continue
+      </button>
+
+    </div>
+<!-- Screen Dashboard -->
+<div id="screen-dashboard" class="screen hidden">
+
+  <!-- Header -->
+  <div class="screen-topbar">
+    <button class="back-btn" onclick="showScreen('screen-home'); renderHomeScreen();">
+      <i class="ri-arrow-left-line"></i>
+    </button>
+    <h2>My Dashboard</h2>
+    <div></div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterDashboard('all', this)">All</button>
+    <button class="filter-tab" onclick="filterDashboard('active', this)">Active</button>
+    <button class="filter-tab" onclick="filterDashboard('overdue', this)">Overdue</button>
+    <button class="filter-tab" onclick="filterDashboard('paid', this)">Paid</button>
+    <button class="filter-tab" onclick="filterDashboard('pending', this)">Pending</button>
+  </div>
+  <button class="btn btn-secondary" onclick="exportCSV()" style="margin-bottom: 16px;">
+  <i class="ri-download-2-line"></i> Export to CSV
+</button>
+  <!-- Dashboard List -->
+  <div id="dashboard-list"></div>
+
+</div>
+
+   
+    <!-- Screen 3: Send Confirmation -->
+<div id="screen-send-confirmation" class="screen hidden">
+
+  <!-- Header -->
+  <div class="screen-topbar">
+    <button class="back-btn" onclick="showScreen('screen-create')">
+      <i class="ri-arrow-left-line"></i>
+    </button>
+    <h2>Send Confirmation</h2>
+    <div></div>
+  </div>
+
+  <!-- Summary Card -->
+  <div class="card" style="margin-bottom: 16px;">
+    <div class="confirm-row">
+      <span class="text-muted">Borrower</span>
+      <span id="sc-borrower" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Amount</span>
+      <span id="sc-amount" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Due Date</span>
+      <span id="sc-due" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Status</span>
+      <span class="badge badge-pending">Pending confirmation</span>
+    </div>
+  </div>
+
+  <!-- WhatsApp Preview -->
+  <p class="text-muted" style="margin-bottom: 6px;">Message preview</p>
+  <div class="wa-bubble" id="sc-message-preview"></div>
+
+  <!-- Send Button -->
+  <button class="btn btn-primary" id="sc-wa-btn" style="margin-top: 8px;">
+    <i class="ri-whatsapp-line"></i> Send via WhatsApp
+  </button>
+
+  <!-- Note -->
+  <p class="text-muted" style="text-align:center; margin-top: 12px;">
+    Contract activates once borrower confirms
+  </p>
+
+  <!-- Skip -->
+  <p style="text-align:center; margin-top: 16px;">
+    <a id="sc-skip-link" href="#" class="skip-link">Skip confirmation (demo)</a>
+  </p>
+
+</div>
+
+   <!-- Screen 4: Borrower Confirmation -->
+<div id="screen-confirm" class="screen hidden">
+
+  <!-- Header -->
+  <div class="confirm-hero">
+    <div class="confirm-hero-icon">
+      <i class="ri-hand-coin-fill"></i>
+    </div>
+    <h1>UdhaarBook</h1>
+    <p class="text-secondary">You have been sent a confirmation request</p>
+  </div>
+
+  <!-- Contract Details Card -->
+  <div class="card" style="margin-bottom: 16px;">
+    <div class="confirm-row">
+      <span class="text-muted">Lender</span>
+      <span id="bc-lender" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Borrower</span>
+      <span id="bc-borrower" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Amount</span>
+      <span id="bc-amount" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Due Date</span>
+      <span id="bc-due" class="confirm-val"></span>
+    </div>
+    <div id="bc-note-row">
+      <div class="divider"></div>
+      <div class="confirm-row">
+        <span class="text-muted">Note</span>
+        <span id="bc-note" class="confirm-val"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agreement Text -->
+  <div class="agreement-box">
+    <i class="ri-information-line"></i>
+    <p id="bc-agreement-text"></p>
+  </div>
+
+  <!-- Confirm Button -->
+  <div class="pulse-wrapper">
+    <button class="btn btn-primary pulse-btn" id="bc-confirm-btn">
+      <i class="ri-checkbox-circle-line"></i> I confirm I have taken this udhaar
+    </button>
+  </div>
+
+  <!-- Decline -->
+  <button class="btn btn-danger" id="bc-decline-btn" style="margin-top: 10px;">
+    <i class="ri-close-circle-line"></i> Decline
+  </button>
+
+  <!-- Not found state -->
+  <div id="bc-not-found" class="empty-state hidden">
+    <i class="ri-error-warning-line"></i>
+    Contract not found. Please ask the lender to resend the link.
+  </div>
+
+</div>
+    <!-- Screen 5: Contract -->
+    <!-- Screen 5: Contract -->
+<div id="screen-contract" class="screen hidden">
+
+  <!-- Teal Header -->
+  <div class="contract-header">
+    <div class="contract-header-top">
+      <i class="ri-hand-coin-fill"></i>
+      <span>UdhaarBook Agreement</span>
+    </div>
+    <p id="ct-id" class="contract-id"></p>
+    <p id="ct-amount" class="contract-amount"></p>
+  </div>
+
+  <!-- Parties -->
+  <div class="parties-row">
+    <div class="party-box">
+      <span class="text-muted">Lender</span>
+      <span id="ct-lender" class="party-name"></span>
+    </div>
+    <div class="party-arrow">
+      <i class="ri-arrow-right-line"></i>
+    </div>
+    <div class="party-box party-box-right">
+      <span class="text-muted">Borrower</span>
+      <span id="ct-borrower" class="party-name"></span>
+    </div>
+  </div>
+
+  <!-- Meta Info -->
+  <div class="card" style="margin-bottom: 16px;">
+    <div class="confirm-row">
+      <span class="text-muted">Created</span>
+      <span id="ct-created" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Due Date</span>
+      <span id="ct-due" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Days Remaining</span>
+      <span id="ct-days" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Phone</span>
+      <span id="ct-phone" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Reminders Sent</span>
+      <span id="ct-reminders" class="confirm-val"></span>
+    </div>
+    <div id="ct-note-row">
+      <div class="divider"></div>
+      <div class="confirm-row">
+        <span class="text-muted">Note</span>
+        <span id="ct-note" class="confirm-val"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Stamp -->
+  <div id="ct-stamp" class="contract-stamp animate__animated animate__fadeIn"></div>
+
+  <!-- Action Buttons -->
+  <div id="ct-btn-reminder" class="hidden">
+    <button class="btn btn-secondary" onclick="loadReminderScreen(currentContractId)">
+      <i class="ri-notification-line"></i> Send Reminder
+    </button>
+  </div>
+
+  <div id="ct-btn-paid" class="hidden">
+    <button class="btn btn-primary" onclick="markPaid(currentContractId)">
+      <i class="ri-checkbox-circle-line"></i> Mark as Paid
+    </button>
+  </div>
+
+  <div id="ct-btn-resend" class="hidden">
+    <button class="btn btn-secondary" onclick="loadSendConfirmationScreen(currentContractId)">
+      <i class="ri-send-plane-line"></i> Resend Confirmation
+    </button>
+  </div>
+
+  <!-- Back -->
+  <button class="btn btn-secondary" onclick="showScreen('screen-home'); renderHomeScreen();" style="margin-top: 10px;">
+    <i class="ri-home-line"></i> Back to Home
+  </button>
+
+</div>
+
+   <!-- Screen 6: Reminder -->
+<div id="screen-reminder" class="screen hidden">
+
+  <!-- Header -->
+  <div class="screen-topbar">
+    <button class="back-btn" onclick="loadContractScreen(currentContractId)">
+      <i class="ri-arrow-left-line"></i>
+    </button>
+    <h2>Send Reminder</h2>
+    <div></div>
+  </div>
+
+  <!-- Borrower Info -->
+  <div class="card" style="margin-bottom: 16px;">
+    <div class="confirm-row">
+      <span class="text-muted">Borrower</span>
+      <span id="rm-borrower" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Amount</span>
+      <span id="rm-amount" class="confirm-val"></span>
+    </div>
+    <div class="divider"></div>
+    <div class="confirm-row">
+      <span class="text-muted">Due Date</span>
+      <span id="rm-due" class="confirm-val"></span>
+    </div>
+  </div>
+
+  <!-- Tone Selector -->
+  <div class="input-group">
+    <label>Message Tone</label>
+    <select id="rm-tone" onchange="changeTone(this.value)">
+      <option value="friendly">Friendly</option>
+      <option value="firm">Firm</option>
+      <option value="urgent">Urgent</option>
+    </select>
+  </div>
+
+  <!-- Message Preview -->
+  <p class="text-muted" style="margin-bottom: 6px;">Message preview</p>
+  <div class="wa-bubble" id="rm-message-preview"></div>
+
+  <!-- Send Button -->
+  <button class="btn btn-primary" id="rm-wa-btn" style="margin-top: 16px;">
+    <i class="ri-whatsapp-line"></i> Send via WhatsApp
+  </button>
+
+  <!-- Cancel -->
+  <button class="btn btn-secondary" onclick="loadContractScreen(currentContractId)" style="margin-top: 10px;">
+    Cancel
+  </button>
+
+</div>
+  </div>
+
+  <!-- Your JS -->
+  <script src="app.js"></script>
+
+</body>
+</html>
