@@ -31,6 +31,12 @@ function init() {
     renderHomeScreen();
     showScreen('screen-home');
   }
+  if (window.firebaseListenUdhaars) {
+  window.firebaseListenUdhaars(function(udhaars) {
+    localStorage.setItem('udhaars', JSON.stringify(udhaars));
+    renderHomeScreen();
+  });
+}
   initButtonEffects();
 }
 
@@ -43,6 +49,10 @@ function saveUdhaar(data) {
   const all = getAllUdhaars();
   all.push(data);
   localStorage.setItem('udhaars', JSON.stringify(all));
+  // Firebase mein bhi save karo
+  if (window.firebaseSaveUdhaar) {
+    window.firebaseSaveUdhaar(data);
+  }
 }
 
 function getAllUdhaars() {
@@ -59,6 +69,10 @@ function updateUdhaar(id, changes) {
   if (index !== -1) {
     all[index] = { ...all[index], ...changes };
     localStorage.setItem('udhaars', JSON.stringify(all));
+  }
+  // Firebase mein bhi update karo
+  if (window.firebaseUpdateUdhaar) {
+    window.firebaseUpdateUdhaar(id, changes);
   }
 }
 
