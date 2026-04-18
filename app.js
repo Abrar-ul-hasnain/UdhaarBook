@@ -253,7 +253,6 @@ function loadSendConfirmationScreen(id) {
 // =====================
 
 function loadConfirmScreen(id) {
-  // Try URL data first (borrower on different device)
   const params = new URLSearchParams(window.location.search);
   const urlData = params.get('data');
 
@@ -261,8 +260,21 @@ function loadConfirmScreen(id) {
 
   if (urlData) {
     try {
-      u = JSON.parse(decodeURIComponent(urlData));
-      // Save to localStorage so confirm/decline can work
+      const short = JSON.parse(decodeURIComponent(urlData));
+      u = {
+        id:             short.i,
+        borrower:       short.b,
+        lender:         short.l,
+        amount:         Number(short.a),
+        dueDate:        short.d,
+        phone:          short.p,
+        note:           short.n || '',
+        status:         'pending',
+        confirmedDate:  null,
+        paidDate:       null,
+        remindersCount: 0,
+        createdDate:    dayjs().format('YYYY-MM-DD')
+      };
       const all = getAllUdhaars();
       const exists = all.find(x => x.id === u.id);
       if (!exists) {
@@ -274,37 +286,30 @@ function loadConfirmScreen(id) {
     }
   }
 
-  // Fallback to localStorage
   if (!u) u = getUdhaarById(id);
 
-  // Not found state
   if (!u) {
     document.getElementById('bc-not-found').classList.remove('hidden');
     return;
   }
 
-  // Fill details
   document.getElementById('bc-lender').textContent   = u.lender;
   document.getElementById('bc-borrower').textContent = u.borrower;
   document.getElementById('bc-amount').textContent   = formatAmount(u.amount);
   document.getElementById('bc-due').textContent      = formatDate(u.dueDate);
 
-  // Note row
   if (u.note) {
     document.getElementById('bc-note').textContent = u.note;
   } else {
     document.getElementById('bc-note-row').classList.add('hidden');
   }
 
-  // Agreement text
   document.getElementById('bc-agreement-text').textContent =
     `You are confirming that you have received ${formatAmount(u.amount)} from ${u.lender} and agree to return it by ${formatDate(u.dueDate)}.`;
 
-  // Buttons
   document.getElementById('bc-confirm-btn').onclick = () => confirmUdhaar(u.id);
   document.getElementById('bc-decline-btn').onclick = () => declineUdhaar(u.id);
 }
-
 function confirmUdhaar(id) {
   updateUdhaar(id, {
     status:        'active',
@@ -314,20 +319,58 @@ function confirmUdhaar(id) {
   Swal.fire({
     icon:               'success',
     title:              'Confirmed!',
-    text:               'Shukriya! Aapne udhaar confirm kar liya. Lender ko notify kar diya jayega.',
+    text:               'You have successfully confirmed this udhaar. A mutual record has been created for both parties.',
     confirmButtonColor: '#0F6E56',
-    confirmButtonText:  'Done'
+    confirmButtonText:  'Done',
+    allowOutsideClick:  false
   }).then(() => {
-    // Show borrower thank you screen instead of contract
     showThankYouScreen();
   });
+}
+
+function showThankYouScreen() {
+  document.getElementById('app').innerHTML = `
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 32px;
+      text-align: center;
+      font-family: Inter, sans-serif;
+      background: white;
+    ">
+      <div style="
+        width: 72px;
+        height: 72px;
+        background: #E1F5EE;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin: 0 auto 20px;
+      ">✓</div>
+      <h2 style="font-size: 20px; font-weight: 600; color: #0D1F1A; margin-bottom: 10px;">
+        Udhaar Confirmed
+      </h2>
+      <p style="font-size: 14px; color: #4A6560; line-height: 1.7; max-width: 280px;">
+        You have successfully acknowledged this udhaar. Both parties now have a mutual digital record.
+        Please ensure payment is made by the due date.
+      </p>
+      <p style="font-size: 12px; color: #8A9E99; margin-top: 24px;">
+        You may now close this tab.
+      </p>
+    </div>
+  `;
 }
 
 function declineUdhaar(id) {
   Swal.fire({
     icon:               'warning',
     title:              'Decline this udhaar?',
-    text:               'This will mark the contract as declined.',
+    text:               'This will mark the contract as declined and notify the lender.',
     showCancelButton:   true,
     confirmButtonColor: '#A32D2D',
     confirmButtonText:  'Yes, decline',
@@ -337,17 +380,49 @@ function declineUdhaar(id) {
       updateUdhaar(id, { status: 'declined' });
       Swal.fire({
         icon:               'info',
-        title:              'Declined',
-        text:               'The udhaar has been declined.',
-        confirmButtonColor: '#0F6E56'
+        title:              'Udhaar Declined',
+        text:               'You have declined this udhaar request. The lender has been notified.',
+        confirmButtonColor: '#0F6E56',
+        allowOutsideClick:  false
       }).then(() => {
-        showScreen('screen-home');
-        renderHomeScreen();
+        document.getElementById('app').innerHTML = `
+          <div style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 32px;
+            text-align: center;
+            font-family: Inter, sans-serif;
+            background: white;
+          ">
+            <div style="
+              width: 72px;
+              height: 72px;
+              background: #FDECEA;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 32px;
+              margin: 0 auto 20px;
+            ">✕</div>
+            <h2 style="font-size: 20px; font-weight: 600; color: #0D1F1A; margin-bottom: 10px;">
+              Udhaar Declined
+            </h2>
+            <p style="font-size: 14px; color: #4A6560; line-height: 1.7; max-width: 280px;">
+              You have declined this udhaar request. The lender will be informed accordingly.
+            </p>
+            <p style="font-size: 12px; color: #8A9E99; margin-top: 24px;">
+              You may now close this tab.
+            </p>
+          </div>
+        `;
       });
     }
   });
 }
-
 // =====================
 // CONTRACT SCREEN
 // =====================
@@ -699,54 +774,6 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-function showThankYouScreen() {
-  Swal.fire({
-    icon: 'success',
-    title: 'Sab theek hai!',
-    html: `
-      <p style="font-size:14px; color:#4A6560; line-height:1.6;">
-        Aapne is udhaar ko confirm kar liya hai.<br><br>
-        Dono parties ke paas ab ek mutual record hai.<br><br>
-        <strong>Due date pe payment yaad rakhein.</strong>
-      </p>
-    `,
-    confirmButtonColor: '#0F6E56',
-    confirmButtonText: 'Theek hai, band karo',
-    allowOutsideClick: false
-  }).then(() => {
-    window.close();
-    // Agar window.close() kaam na kare to blank page dikhao
-    document.getElementById('app').innerHTML = `
-      <div style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        padding: 32px;
-        text-align: center;
-        font-family: Inter, sans-serif;
-      ">
-        <div style="
-          width: 64px;
-          height: 64px;
-          background: #E1F5EE;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 28px;
-          margin: 0 auto 16px;
-        ">✓</div>
-        <h2 style="font-size: 20px; font-weight: 600; color: #0D1F1A; margin-bottom: 8px;">Confirmed!</h2>
-        <p style="font-size: 14px; color: #4A6560; line-height: 1.6;">
-          Aapne udhaar confirm kar liya.<br>Ab yeh tab band kar sakte hain.
-        </p>
-      </div>
-    `;
-  });
-}
-
 // =====================
 // START
 // =====================
