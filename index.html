@@ -130,6 +130,30 @@
         <label>Note (optional)</label>
         <textarea id="field-note" placeholder="e.g. For books, rent, etc."></textarea>
       </div>
+      <div class="input-group">
+  <label>Father's Name</label>
+  <input type="text" id="field-father" placeholder="e.g. Muhammad Ali" />
+</div>
+
+<div class="input-group">
+  <label>CNIC Number</label>
+  <input type="text" id="field-cnic" placeholder="e.g. 42101-1234567-1" maxlength="15" />
+</div>
+
+<div class="input-group">
+  <label>Bank Account / JazzCash / Easypaisa Number</label>
+  <input type="text" id="field-account" placeholder="e.g. 03001234567" />
+</div>
+
+<div class="input-group">
+  <label>Guarantor Name (optional)</label>
+  <input type="text" id="field-guarantor" placeholder="e.g. Someone who can vouch for borrower" />
+</div>
+
+<div class="input-group">
+  <label>Guarantor Phone (optional)</label>
+  <input type="tel" id="field-guarantor-phone" placeholder="e.g. 03001234567" />
+</div>
 
       <button class="btn btn-primary" onclick="createUdhaar()">
         <i class="ri-save-line"></i> Save & Continue
@@ -348,6 +372,37 @@
       <div class="confirm-row">
         <span class="text-muted">Note</span>
         <span id="ct-note" class="confirm-val"></span>
+      </div>
+    </div>
+    </div>
+
+    <div id="ct-security-info">
+      <div class="divider"></div>
+      <div class="confirm-row">
+        <span class="text-muted">Father's Name</span>
+        <span id="ct-father" class="confirm-val"></span>
+      </div>
+      <div class="divider"></div>
+      <div class="confirm-row">
+        <span class="text-muted">CNIC</span>
+        <span id="ct-cnic" class="confirm-val"></span>
+      </div>
+      <div class="divider"></div>
+      <div class="confirm-row">
+        <span class="text-muted">Account / JazzCash</span>
+        <span id="ct-account" class="confirm-val"></span>
+      </div>
+      <div id="ct-guarantor-row">
+        <div class="divider"></div>
+        <div class="confirm-row">
+          <span class="text-muted">Guarantor</span>
+          <span id="ct-guarantor" class="confirm-val"></span>
+        </div>
+        <div class="divider"></div>
+        <div class="confirm-row">
+          <span class="text-muted">Guarantor Phone</span>
+          <span id="ct-guarantor-phone" class="confirm-val"></span>
+        </div>
       </div>
     </div>
   </div>

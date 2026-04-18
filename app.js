@@ -155,12 +155,16 @@ function generateContractId() {
 
 function createUdhaar() {
   // Read fields
-  const borrower = document.getElementById('field-borrower').value.trim();
-  const phone    = document.getElementById('field-phone').value.trim().replace(/\D/g, '');
-  const amount   = document.getElementById('field-amount').value.trim();
-  const dueDate  = document.getElementById('field-due').value;
-  const note     = document.getElementById('field-note').value.trim();
-
+const borrower        = document.getElementById('field-borrower').value.trim();
+const phone           = document.getElementById('field-phone').value.trim().replace(/\D/g, '');
+const amount          = document.getElementById('field-amount').value.trim();
+const dueDate         = document.getElementById('field-due').value;
+const note            = document.getElementById('field-note').value.trim();
+const fatherName      = document.getElementById('field-father').value.trim();
+const cnic            = document.getElementById('field-cnic').value.trim();
+const account         = document.getElementById('field-account').value.trim();
+const guarantor       = document.getElementById('field-guarantor').value.trim();
+const guarantorPhone  = document.getElementById('field-guarantor-phone').value.trim();
   // Validate
   if (!borrower) {
     Swal.fire({ icon: 'warning', title: 'Missing field', text: 'Please enter borrower name.', confirmButtonColor: '#0F6E56' });
@@ -178,22 +182,39 @@ function createUdhaar() {
     Swal.fire({ icon: 'warning', title: 'Missing field', text: 'Please select a due date.', confirmButtonColor: '#0F6E56' });
     return;
   }
+  if (!fatherName) {
+  Swal.fire({ icon: 'warning', title: 'Missing field', text: "Please enter borrower's father name.", confirmButtonColor: '#0F6E56' });
+  return;
+}
+if (!cnic || cnic.length < 13) {
+  Swal.fire({ icon: 'warning', title: 'Invalid CNIC', text: 'Please enter a valid CNIC number.', confirmButtonColor: '#0F6E56' });
+  return;
+}
+if (!account) {
+  Swal.fire({ icon: 'warning', title: 'Missing field', text: 'Please enter bank/JazzCash/Easypaisa number.', confirmButtonColor: '#0F6E56' });
+  return;
+}
 
   // Build object
-  const udhaar = {
-    id:             generateContractId(),
-    lender:         'You',
-    borrower:       borrower,
-    phone:          phone.startsWith('92') ? phone : '92' + phone.replace(/^0/, ''),
-    amount:         Number(amount),
-    note:           note,
-    createdDate:    dayjs().format('YYYY-MM-DD'),
-    dueDate:        dueDate,
-    status:         'pending',
-    confirmedDate:  null,
-    paidDate:       null,
-    remindersCount: 0
-  };
+ const udhaar = {
+  id:             generateContractId(),
+  lender:         'You',
+  borrower:       borrower,
+  phone:          phone.startsWith('92') ? phone : '92' + phone.replace(/^0/, ''),
+  amount:         Number(amount),
+  note:           note,
+  fatherName:     fatherName,
+  cnic:           cnic,
+  account:        account,
+  guarantor:      guarantor,
+  guarantorPhone: guarantorPhone,
+  createdDate:    dayjs().format('YYYY-MM-DD'),
+  dueDate:        dueDate,
+  status:         'pending',
+  confirmedDate:  null,
+  paidDate:       null,
+  remindersCount: 0
+};
 
   // Save
   saveUdhaar(udhaar);
@@ -500,7 +521,17 @@ function loadContractScreen(id) {
   } else {
     document.getElementById('ct-note-row').classList.add('hidden');
   }
+// Security info
+  document.getElementById('ct-father').textContent  = u.fatherName  || '-';
+  document.getElementById('ct-cnic').textContent    = u.cnic        || '-';
+  document.getElementById('ct-account').textContent = u.account     || '-';
 
+  if (u.guarantor) {
+    document.getElementById('ct-guarantor').textContent       = u.guarantor;
+    document.getElementById('ct-guarantor-phone').textContent = u.guarantorPhone || '-';
+  } else {
+    document.getElementById('ct-guarantor-row').classList.add('hidden');
+  }
   // Stamp
   renderContractStamp(u);
 
