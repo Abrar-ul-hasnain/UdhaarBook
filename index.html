@@ -22,6 +22,17 @@
 
   <!-- Firebase -->
 <script type="module" src="firebase.js"></script>
+<script>
+  // Wait for Firebase to load then init
+  window.addEventListener('firebaseReady', function() {
+    if (window.firebaseListenUdhaars) {
+      window.firebaseListenUdhaars(function(udhaars) {
+        localStorage.setItem('udhaars', JSON.stringify(udhaars));
+        if (typeof renderHomeScreen === 'function') renderHomeScreen();
+      });
+    }
+  });
+</script>
 
   <!-- Your CSS -->
   <link rel="stylesheet" href="style.css" />

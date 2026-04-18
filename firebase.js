@@ -43,3 +43,6 @@ window.firebaseListenUdhaars = function(callback) {
     }
   });
 };
+
+// Signal that Firebase is ready
+window.dispatchEvent(new Event('firebaseReady'));

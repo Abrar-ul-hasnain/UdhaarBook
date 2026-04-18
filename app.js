@@ -31,12 +31,7 @@ function init() {
     renderHomeScreen();
     showScreen('screen-home');
   }
-  if (window.firebaseListenUdhaars) {
-  window.firebaseListenUdhaars(function(udhaars) {
-    localStorage.setItem('udhaars', JSON.stringify(udhaars));
-    renderHomeScreen();
-  });
-}
+ 
   initButtonEffects();
 }
 
