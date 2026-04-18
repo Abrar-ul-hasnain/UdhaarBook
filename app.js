@@ -305,11 +305,12 @@ function confirmUdhaar(id) {
   Swal.fire({
     icon:               'success',
     title:              'Confirmed!',
-    text:               'Both parties now have a mutual record.',
+    text:               'Shukriya! Aapne udhaar confirm kar liya. Lender ko notify kar diya jayega.',
     confirmButtonColor: '#0F6E56',
-    confirmButtonText:  'View Contract'
+    confirmButtonText:  'Done'
   }).then(() => {
-    loadContractScreen(id);
+    // Show borrower thank you screen instead of contract
+    showThankYouScreen();
   });
 }
 
@@ -689,6 +690,26 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+function showThankYouScreen() {
+  Swal.fire({
+    icon: 'success',
+    title: 'Sab theek hai!',
+    html: `
+      <p style="font-size:14px; color:#4A6560; line-height:1.6;">
+        Aapne is udhaar ko confirm kar liya hai.<br><br>
+        Dono parties ke paas ab ek mutual record hai.<br><br>
+        <strong>Due date pe payment yaad rakhein.</strong>
+      </p>
+    `,
+    confirmButtonColor: '#0F6E56',
+    confirmButtonText: 'Theek hai, band karo',
+    allowOutsideClick: false
+  }).then(() => {
+    // Close or go to blank home
+    showScreen('screen-home');
+    renderHomeScreen();
+  });
+}
 
 // =====================
 // START
