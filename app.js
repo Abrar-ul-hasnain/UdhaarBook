@@ -198,9 +198,11 @@ function createUdhaar() {
 // =====================
 
 function buildConfirmationLink(id) {
-  return `https://udhaarbook.netlify.app/?confirm=${id}`;
+  const u = getUdhaarById(id);
+  if (!u) return '';
+  const encoded = encodeURIComponent(JSON.stringify(u));
+  return `https://udhaarbook.netlify.app/?confirm=${id}&data=${encoded}`;
 }
-
 function buildWhatsAppLink(phone, message) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
@@ -242,7 +244,29 @@ function loadSendConfirmationScreen(id) {
 // =====================
 
 function loadConfirmScreen(id) {
-  const u = getUdhaarById(id);
+  // Try URL data first (borrower on different device)
+  const params = new URLSearchParams(window.location.search);
+  const urlData = params.get('data');
+
+  let u = null;
+
+  if (urlData) {
+    try {
+      u = JSON.parse(decodeURIComponent(urlData));
+      // Save to localStorage so confirm/decline can work
+      const all = getAllUdhaars();
+      const exists = all.find(x => x.id === u.id);
+      if (!exists) {
+        all.push(u);
+        localStorage.setItem('udhaars', JSON.stringify(all));
+      }
+    } catch(e) {
+      console.error('URL data parse error', e);
+    }
+  }
+
+  // Fallback to localStorage
+  if (!u) u = getUdhaarById(id);
 
   // Not found state
   if (!u) {
@@ -267,10 +291,8 @@ function loadConfirmScreen(id) {
   document.getElementById('bc-agreement-text').textContent =
     `You are confirming that you have received ${formatAmount(u.amount)} from ${u.lender} and agree to return it by ${formatDate(u.dueDate)}.`;
 
-  // Confirm button
+  // Buttons
   document.getElementById('bc-confirm-btn').onclick = () => confirmUdhaar(u.id);
-
-  // Decline button
   document.getElementById('bc-decline-btn').onclick = () => declineUdhaar(u.id);
 }
 
