@@ -292,6 +292,7 @@ function loadSendConfirmationScreen(id) {
       }
     });
   }
+  window.currentSendId = u.id;
   showScreen('screen-send-confirmation');
 }
 
@@ -839,6 +840,42 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+function cancelUdhaar(id) {
+  Swal.fire({
+    icon:               'warning',
+    title:              'Cancel Request?',
+    text:               'This will permanently delete this udhaar request.',
+    showCancelButton:   true,
+    confirmButtonColor: '#A32D2D',
+    confirmButtonText:  'Yes, cancel it',
+    cancelButtonText:   'Go back'
+  }).then(result => {
+    if (result.isConfirmed) {
+      // Remove from localStorage
+      const all = getAllUdhaars().filter(u => u.id !== id);
+      localStorage.setItem('udhaars', JSON.stringify(all));
+
+      // Remove from Firebase
+      if (window.firebaseUpdateUdhaar) {
+        import('https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js')
+          .then(({ getDatabase, ref, remove }) => {
+            const db = getDatabase();
+            remove(ref(db, 'udhaars/' + id));
+          });
+      }
+
+      Swal.fire({
+        icon:               'success',
+        title:              'Request Cancelled',
+        text:               'The udhaar request has been successfully cancelled.',
+        confirmButtonColor: '#0F6E56'
+      }).then(() => {
+        renderHomeScreen();
+        showScreen('screen-home');
+      });
+    }
+  });
+}
 // =====================
 // START
 // =====================
