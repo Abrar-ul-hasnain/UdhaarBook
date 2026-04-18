@@ -31,7 +31,10 @@ function init() {
     renderHomeScreen();
     showScreen('screen-home');
   }
- 
+ // Check upcoming dues
+  if (!new URLSearchParams(window.location.search).get('confirm')) {
+    setTimeout(checkUpcomingDues, 1500);
+  }
   initButtonEffects();
 }
 
@@ -874,6 +877,63 @@ function cancelUdhaar(id) {
         showScreen('screen-home');
       });
     }
+  });
+}
+// =====================
+// AUTO REMINDER CHECK
+// =====================
+
+function checkUpcomingDues() {
+  const all = getAllUdhaars();
+  const upcoming = all.filter(u => {
+    const days = getDaysRemaining(u.dueDate);
+    const status = getBadgeStatus(u);
+    return (status === 'active' || status === 'soon') && days >= 0 && days <= 3;
+  });
+
+  if (upcoming.length === 0) return;
+
+  // Show one by one
+  showDueReminder(upcoming, 0);
+}
+
+function showDueReminder(list, index) {
+  if (index >= list.length) return;
+
+  const u = list[index];
+  const days = getDaysRemaining(u.dueDate);
+  const daysText = days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`;
+
+  Swal.fire({
+    icon: 'warning',
+    title: '⏰ Payment Due Soon!',
+    html: `
+      <p style="font-size:14px; color:#4A6560; line-height:1.7;">
+        <strong>${u.borrower}</strong> owes you 
+        <strong>${formatAmount(u.amount)}</strong><br>
+        Payment is due <strong>${daysText}</strong> (${formatDate(u.dueDate)})
+      </p>
+    `,
+    showCancelButton:   true,
+    confirmButtonColor: '#0F6E56',
+    confirmButtonText:  'Send Reminder',
+    cancelButtonText:   'Skip',
+    allowOutsideClick:  false
+  }).then(result => {
+    if (result.isConfirmed) {
+      // Build friendly message
+      const msg = `Assalamu Alaikum ${u.borrower} bhai, just a gentle reminder — ${formatAmount(u.amount)} is due ${daysText} on ${formatDate(u.dueDate)}. Please arrange payment. Thank you.`;
+      window.open(buildWhatsAppLink(u.phone, msg), '_blank');
+
+      // Increment reminders count
+      updateUdhaar(u.id, { remindersCount: u.remindersCount + 1 });
+      if (window.firebaseUpdateUdhaar) {
+        window.firebaseUpdateUdhaar(u.id, { remindersCount: u.remindersCount + 1 });
+      }
+    }
+
+    // Show next one
+    showDueReminder(list, index + 1);
   });
 }
 // =====================
