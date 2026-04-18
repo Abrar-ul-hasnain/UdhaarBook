@@ -272,6 +272,9 @@ h3 { font-size: 15px; font-weight: 500; }
   color: var(--color-text-primary);
   margin: 12px 0;
   animation: cardFadeUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 /* =====================

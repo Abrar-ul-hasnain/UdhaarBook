@@ -200,7 +200,16 @@ function createUdhaar() {
 function buildConfirmationLink(id) {
   const u = getUdhaarById(id);
   if (!u) return '';
-  const encoded = encodeURIComponent(JSON.stringify(u));
+  const shortData = {
+    i: u.id,
+    b: u.borrower,
+    l: u.lender,
+    a: u.amount,
+    d: u.dueDate,
+    p: u.phone,
+    n: u.note || ''
+  };
+  const encoded = encodeURIComponent(JSON.stringify(shortData));
   return `https://udhaarbook.netlify.app/?confirm=${id}&data=${encoded}`;
 }
 function buildWhatsAppLink(phone, message) {
@@ -705,9 +714,36 @@ function showThankYouScreen() {
     confirmButtonText: 'Theek hai, band karo',
     allowOutsideClick: false
   }).then(() => {
-    // Close or go to blank home
-    showScreen('screen-home');
-    renderHomeScreen();
+    window.close();
+    // Agar window.close() kaam na kare to blank page dikhao
+    document.getElementById('app').innerHTML = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 32px;
+        text-align: center;
+        font-family: Inter, sans-serif;
+      ">
+        <div style="
+          width: 64px;
+          height: 64px;
+          background: #E1F5EE;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+          margin: 0 auto 16px;
+        ">✓</div>
+        <h2 style="font-size: 20px; font-weight: 600; color: #0D1F1A; margin-bottom: 8px;">Confirmed!</h2>
+        <p style="font-size: 14px; color: #4A6560; line-height: 1.6;">
+          Aapne udhaar confirm kar liya.<br>Ab yeh tab band kar sakte hain.
+        </p>
+      </div>
+    `;
   });
 }
 
