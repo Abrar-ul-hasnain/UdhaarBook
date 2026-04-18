@@ -423,11 +423,14 @@
     </button>
   </div>
 
-  <div id="ct-btn-resend" class="hidden">
-    <button class="btn btn-secondary" onclick="loadSendConfirmationScreen(currentContractId)">
-      <i class="ri-send-plane-line"></i> Resend Confirmation
-    </button>
-  </div>
+<div id="ct-btn-resend" class="hidden">
+  <button class="btn btn-secondary" onclick="loadSendConfirmationScreen(currentContractId)">
+    <i class="ri-send-plane-line"></i> Resend Confirmation
+  </button>
+  <button class="btn btn-danger" onclick="cancelUdhaar(currentContractId)" style="margin-top: 10px;">
+    <i class="ri-close-circle-line"></i> Cancel Request
+  </button>
+</div>
 
   <!-- Back -->
   <button class="btn btn-secondary" onclick="showScreen('screen-home'); renderHomeScreen();" style="margin-top: 10px;">
