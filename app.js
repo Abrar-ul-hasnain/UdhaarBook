@@ -253,7 +253,24 @@ function loadSendConfirmationScreen(id) {
     e.preventDefault();
     loadContractScreen(u.id);
   };
-
+  // Listen for borrower confirmation
+  if (window.firebaseListenUdhaar) {
+    window.firebaseListenUdhaar(u.id, function(updatedUdhaar) {
+      if (updatedUdhaar.status === 'active') {
+        Swal.fire({
+          icon:               'success',
+          title:              'Confirmed!',
+          text:               `${updatedUdhaar.borrower} has confirmed the udhaar. Contract is now active.`,
+          confirmButtonColor: '#0F6E56',
+          confirmButtonText:  'View Contract',
+          allowOutsideClick:  false
+        }).then(() => {
+          renderHomeScreen();
+          showScreen('screen-home');
+        });
+      }
+    });
+  }
   showScreen('screen-send-confirmation');
 }
 
@@ -324,6 +341,14 @@ function confirmUdhaar(id) {
     status:        'active',
     confirmedDate: dayjs().format('YYYY-MM-DD')
   });
+
+  // Firebase update
+  if (window.firebaseUpdateUdhaar) {
+    window.firebaseUpdateUdhaar(id, {
+      status:        'active',
+      confirmedDate: dayjs().format('YYYY-MM-DD')
+    });
+  }
 
   Swal.fire({
     icon:               'success',

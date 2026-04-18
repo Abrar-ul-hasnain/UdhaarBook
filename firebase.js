@@ -43,6 +43,13 @@ window.firebaseListenUdhaars = function(callback) {
     }
   });
 };
-
+// Listen for specific udhaar status change
+window.firebaseListenUdhaar = function(id, callback) {
+  onValue(ref(db, 'udhaars/' + id), snapshot => {
+    if (snapshot.exists()) {
+      callback(snapshot.val());
+    }
+  });
+};
 // Signal that Firebase is ready
 window.dispatchEvent(new Event('firebaseReady'));
