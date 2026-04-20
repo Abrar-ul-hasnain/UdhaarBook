@@ -2,7 +2,6 @@
 ### Track informal loans with trust. No bank needed.
 
 🌐 **Live Demo:** [udhaarbook.netlify.app](https://udhaarbook.netlify.app)  
-💻 **GitHub:** [github.com/Abrar-ul-hasnain/UdhaarBook](https://github.com/Abrar-ul-hasnain/UdhaarBook)
 
 ---
 
