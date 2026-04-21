@@ -53,3 +53,10 @@ window.firebaseListenUdhaar = function(id, callback) {
 };
 // Signal that Firebase is ready
 window.dispatchEvent(new Event('firebaseReady'));
+// Delete udhaar from Firebase
+window.firebaseDeleteUdhaar = function(id) {
+  import('https://www.gstatic.com/firebasejs/12.12.0/firebase-database.js')
+    .then(({ ref: dbRef, remove }) => {
+      remove(dbRef(db, 'udhaars/' + id));
+    });
+};
